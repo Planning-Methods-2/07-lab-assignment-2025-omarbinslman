@@ -28,3 +28,66 @@
 
 
 
+library(data.table)
+library(foreign)
+library(ggplot2)
+
+
+#Q1.1
+
+HTS <- data.table(read.spss("datasets/HTS.household.10regions.sav", to.data.frame = TRUE))
+
+#Q2.1
+HTS[,.N, by = sf]
+
+names(HTS)
+
+
+p1 <- ggplot(data=HTS, aes(x=hhincome)) +
+  geom_histogram(bins = 30) +
+  facet_grid(sf ~ .)
+
+ggsave(filename = "household_income.pdf", plot = p1, width = 8, height = 6)
+
+
+two_tailed_t_test<-HTS[,t.test(formula = hhincome ~ sf)] 
+two_tailed_t_test
+
+curve(dt(x, df = 5934.7), from = -10, to = 10)
+abline(h=0,col='blue')
+points(x=two_tailed_t_test$statistic,y=0,col='red')
+upper975 <- qt(p = .975, df = 5934.7)
+abline(v = upper975,y=0,col='red')
+lower025 <- qt(p = .025, df = 5934.7)
+abline(v = lower025,y=0,col='red')
+
+#Households in single family homes have a much higher average income compared to households in other types of housing.
+
+
+
+
+#Q 2.3
+HTS_SA <- HTS[region == "San Antonio, TX"]
+
+names(HTS_SA)
+
+
+jobpop_median <- median(HTS_SA$jobpop, na.rm = TRUE)
+HTS_SA[, jobpop_group := ifelse(jobpop >= jobpop_median, "Above Median", "Below Median")]
+t_test_result <- t.test(lnvmt ~ jobpop_group, data = HTS_SA)
+print(t_test_result)
+
+
+#Q 2.3
+
+bartlett_result <- bartlett.test(lnvmt ~ income_cat, data = HTS_SA)
+print(bartlett_result)
+
+result_anova <- aov(lnvmt ~ income_cat, data = HTS_SA)
+summary(result_anova)
+
+tukey_result <- TukeyHSD(result_anova)
+print(tukey_result)
+
+
+

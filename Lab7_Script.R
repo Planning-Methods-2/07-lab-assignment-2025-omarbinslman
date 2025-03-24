@@ -24,8 +24,8 @@ library(foreign)
 hts <- data.table(read.spss("datasets/HTS.household.10regions.sav",to.data.frame = T))
 
 # step 1 - Independence: there is no reason to think that the VMT values between these two regions are not independent
-hts[,.N,by=region]
-hts<-hts[region%in%c("Seattle, WA","Kansas City, MO")]
+hts[,.N,by=region] #number of observation 
+hts<-hts[region%in%c("Seattle, WA","Kansas City, MO")]  #selecting these reigons 
 
 # step 1 - Normality: Histogram plots look pretty normal
 
